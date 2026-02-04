@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер тестов Word в JSON</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-file-word"></i> Конвертер тестов Word → JSON</h1>
+            <p class="subtitle">Загрузите Word-файл с тестами по шаблону и получите JSON для вашего приложения</p>
+        </header>
+
+        <main>
+            <div class="upload-section">
+                <div class="upload-box" id="uploadBox">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <h3>Загрузите Word-файл с тестами</h3>
+                    <p>Перетащите файл сюда или нажмите для выбора</p>
+                    <input type="file" id="fileInput" accept=".docx,.doc,.txt">
+                    <label for="fileInput" class="btn">Выбрать файл</label>
+                    <p class="file-types">Поддерживаемые форматы: .docx, .doc, .txt</p>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> Требуемый формат файла:</h3>
+                <div class="template-example">
+                    <pre>Вопрос 1?
+правильный вариант
+неправильный вариант
+неправильный вариант
+неправильный вариант
+неправильный вариант
+
+Вопрос 2?
+правильный вариант
+неправильный вариант
+неправильный вариант
+неправильный вариант
+неправильный вариант</pre>
+                    <div class="template-note">
+                        <p><strong>Важно:</strong></p>
+                        <ul>
+                            <li>Каждый вопрос должен заканчиваться знаком вопроса "?"</li>
+                            <li>Первым вариантом после вопроса должен быть правильный ответ</li>
+                            <li>После вопроса должно быть ровно 5 вариантов ответов (1 правильный + 4 неправильных)</li>
+                            <li>Между вопросами должна быть пустая строка</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="conversion-section">
+                <div class="law-input">
+                    <label for="lawNumber">Номер закона (для поля "law" в JSON):</label>
+                    <input type="number" id="lawNumber" min="1" value="1">
+                </div>
+                <button id="convertBtn" class="btn convert-btn" disabled>
+                    <i class="fas fa-exchange-alt"></i> Конвертировать в JSON
+                </button>
+            </div>
+
+            <div class="result-section">
+                <h3><i class="fas fa-file-code"></i> Результат (JSON):</h3>
+                <div class="result-controls">
+                    <button id="copyBtn" class="btn secondary-btn" disabled>
+                        <i class="fas fa-copy"></i> Копировать JSON
+                    </button>
+                    <button id="downloadBtn" class="btn secondary-btn" disabled>
+                        <i class="fas fa-download"></i> Скачать JSON файл
+                    </button>
+                    <button id="clearBtn" class="btn secondary-btn">
+                        <i class="fas fa-trash-alt"></i> Очистить
+                    </button>
+                </div>
+                <pre id="jsonOutput">Загрузите файл и нажмите "Конвертировать в JSON"</pre>
+            </div>
+
+            <div class="preview-section">
+                <h3><i class="fas fa-eye"></i> Предпросмотр тестов:</h3>
+                <div id="previewContainer">
+                    <p class="placeholder">Здесь будет показана структура извлеченных тестов</p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2023 Конвертер тестов Word → JSON. Работает полностью в браузере.</p>
+            <p class="note">Примечание: Для корректной работы с .docx файлами используйте современные браузеры (Chrome, Firefox, Edge)</p>
+        </footer>
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notificationText">Текст уведомления</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
