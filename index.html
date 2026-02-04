@@ -3,33 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Конвертер тестов Word в JSON</title>
+    <title>Конвертер текстовых тестов в JSON</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-file-word"></i> Конвертер тестов Word → JSON</h1>
-            <p class="subtitle">Загрузите Word-файл с тестами по шаблону и получите JSON для вашего приложения</p>
+            <h1><i class="fas fa-file-alt"></i> Конвертер текстовых тестов → JSON</h1>
+            <p class="subtitle">Вставьте текст с тестами по шаблону и получите JSON для вашего приложения</p>
         </header>
 
         <main>
-            <div class="upload-section">
-                <div class="upload-box" id="uploadBox">
-                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                    <h3>Загрузите Word-файл с тестами</h3>
-                    <p>Перетащите файл сюда или нажмите для выбора</p>
-                    <input type="file" id="fileInput" accept=".docx,.doc,.txt">
-                    <label for="fileInput" class="btn">Выбрать файл</label>
-                    <p class="file-types">Поддерживаемые форматы: .docx, .doc, .txt</p>
-                </div>
-            </div>
-
-            <div class="instructions">
-                <h3><i class="fas fa-info-circle"></i> Требуемый формат файла:</h3>
-                <div class="template-example">
-                    <pre>Вопрос 1?
+            <div class="input-section">
+                <div class="text-input-area">
+                    <h3><i class="fas fa-edit"></i> Вставьте текст с тестами:</h3>
+                    <textarea id="textInput" placeholder="Вопрос 1?
 правильный вариант
 неправильный вариант
 неправильный вариант
@@ -41,27 +30,76 @@
 неправильный вариант
 неправильный вариант
 неправильный вариант
-неправильный вариант</pre>
+неправильный вариант
+
+... и так далее"></textarea>
+                    <div class="input-controls">
+                        <button id="clearInputBtn" class="btn secondary-btn">
+                            <i class="fas fa-eraser"></i> Очистить поле
+                        </button>
+                        <button id="loadExampleBtn" class="btn secondary-btn">
+                            <i class="fas fa-magic"></i> Загрузить пример
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> Требуемый формат текста:</h3>
+                <div class="template-example">
+                    <div class="format-explanation">
+                        <div class="format-item">
+                            <div class="format-number">1</div>
+                            <div class="format-text">Вопрос должен заканчиваться знаком вопроса "?"</div>
+                        </div>
+                        <div class="format-item">
+                            <div class="format-number">2</div>
+                            <div class="format-text">Первая строка после вопроса - правильный ответ</div>
+                        </div>
+                        <div class="format-item">
+                            <div class="format-number">3</div>
+                            <div class="format-text">Следующие 4 строки - неправильные варианты</div>
+                        </div>
+                        <div class="format-item">
+                            <div class="format-number">4</div>
+                            <div class="format-text">Между вопросами должна быть пустая строка</div>
+                        </div>
+                    </div>
                     <div class="template-note">
-                        <p><strong>Важно:</strong></p>
-                        <ul>
-                            <li>Каждый вопрос должен заканчиваться знаком вопроса "?"</li>
-                            <li>Первым вариантом после вопроса должен быть правильный ответ</li>
-                            <li>После вопроса должно быть ровно 5 вариантов ответов (1 правильный + 4 неправильных)</li>
-                            <li>Между вопросами должна быть пустая строка</li>
-                        </ul>
+                        <pre class="template-example-code">Пример 1?
+Правильный ответ 1
+Неправильный ответ 1
+Неправильный ответ 2
+Неправильный ответ 3
+Неправильный ответ 4
+
+Пример 2?
+Правильный ответ 2
+Неправильный ответ 5
+Неправильный ответ 6
+Неправильный ответ 7
+Неправильный ответ 8
+
+Пример 3?
+Правильный ответ 3
+Неправильный ответ 9
+Неправильный ответ 10
+Неправильный ответ 11
+Неправильный ответ 12</pre>
                     </div>
                 </div>
             </div>
 
             <div class="conversion-section">
-                <div class="law-input">
-                    <label for="lawNumber">Номер закона (для поля "law" в JSON):</label>
-                    <input type="number" id="lawNumber" min="1" value="1">
+                <div class="conversion-controls">
+                    <div class="law-input">
+                        <label for="lawNumber">Начальный номер для поля "law" в JSON:</label>
+                        <input type="number" id="lawNumber" min="1" value="1">
+                    </div>
+                    <button id="convertBtn" class="btn convert-btn">
+                        <i class="fas fa-exchange-alt"></i> Конвертировать в JSON
+                    </button>
                 </div>
-                <button id="convertBtn" class="btn convert-btn" disabled>
-                    <i class="fas fa-exchange-alt"></i> Конвертировать в JSON
-                </button>
             </div>
 
             <div class="result-section">
@@ -73,24 +111,38 @@
                     <button id="downloadBtn" class="btn secondary-btn" disabled>
                         <i class="fas fa-download"></i> Скачать JSON файл
                     </button>
-                    <button id="clearBtn" class="btn secondary-btn">
-                        <i class="fas fa-trash-alt"></i> Очистить
+                    <button id="clearAllBtn" class="btn secondary-btn">
+                        <i class="fas fa-trash-alt"></i> Очистить все
                     </button>
                 </div>
-                <pre id="jsonOutput">Загрузите файл и нажмите "Конвертировать в JSON"</pre>
+                <pre id="jsonOutput">Вставьте текст с тестами выше и нажмите "Конвертировать в JSON"</pre>
             </div>
 
             <div class="preview-section">
-                <h3><i class="fas fa-eye"></i> Предпросмотр тестов:</h3>
+                <h3><i class="fas fa-eye"></i> Предпросмотр структуры тестов:</h3>
                 <div id="previewContainer">
-                    <p class="placeholder">Здесь будет показана структура извлеченных тестов</p>
+                    <p class="placeholder">Здесь будет показана структура извлеченных тестов после конвертации</p>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Всего вопросов: <span id="totalQuestions">0</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Правильных ответов: <span id="correctAnswers">0</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-times-circle"></i>
+                        <span>Неправильных вариантов: <span id="incorrectAnswers">0</span></span>
+                    </div>
                 </div>
             </div>
         </main>
 
         <footer>
-            <p>© 2023 Конвертер тестов Word → JSON. Работает полностью в браузере.</p>
-            <p class="note">Примечание: Для корректной работы с .docx файлами используйте современные браузеры (Chrome, Firefox, Edge)</p>
+            <p>© 2023 Конвертер текстовых тестов в JSON. Работает полностью в браузере.</p>
+            <p class="note">Все данные обрабатываются локально и никуда не отправляются</p>
         </footer>
     </div>
 

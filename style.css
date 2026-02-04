@@ -52,63 +52,60 @@ main {
     padding: 30px;
 }
 
-/* Секция загрузки */
-.upload-section {
+/* Секция ввода текста */
+.input-section {
     margin-bottom: 40px;
 }
 
-.upload-box {
-    border: 3px dashed #3498db;
-    border-radius: 15px;
-    padding: 50px 30px;
-    text-align: center;
+.text-input-area {
     background-color: #f8fafc;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    border-radius: 15px;
+    padding: 25px;
+    border: 2px solid #e1e8f0;
 }
 
-.upload-box:hover {
-    background-color: #eef5ff;
-    border-color: #2980b9;
-}
-
-.upload-box.dragover {
-    background-color: #e1f0ff;
-    border-color: #1abc9c;
-    transform: scale(1.01);
-}
-
-.upload-icon {
-    font-size: 4rem;
-    color: #3498db;
-    margin-bottom: 20px;
-}
-
-.upload-box h3 {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
+.text-input-area h3 {
     color: #2c3e50;
-}
-
-.upload-box p {
-    color: #7f8c8d;
     margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-.file-types {
-    font-size: 0.9rem;
-    color: #95a5a6;
-    margin-top: 15px;
+#textInput {
+    width: 100%;
+    height: 250px;
+    padding: 20px;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    resize: vertical;
+    font-family: 'Courier New', monospace;
+    background-color: white;
+    color: #2c3e50;
+    transition: border-color 0.3s;
 }
 
-/* Скрываем стандартный input file */
-#fileInput {
-    display: none;
+#textInput:focus {
+    border-color: #3498db;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.input-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
 }
 
 /* Кнопки */
 .btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
     background: linear-gradient(to right, #3498db, #2c3e50);
     color: white;
     border: none;
@@ -150,10 +147,6 @@ main {
 .convert-btn {
     font-size: 1.2rem;
     padding: 16px 35px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0 auto;
 }
 
 /* Инструкции */
@@ -179,16 +172,38 @@ main {
     gap: 30px;
 }
 
-.template-example pre {
+.format-explanation {
     flex: 1;
     min-width: 300px;
-    background-color: #2c3e50;
-    color: #ecf0f1;
-    padding: 20px;
+}
+
+.format-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background-color: white;
     border-radius: 10px;
-    overflow-x: auto;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.format-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(to right, #3498db, #2c3e50);
+    color: white;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.format-text {
     font-size: 1.1rem;
-    line-height: 1.8;
+    color: #2c3e50;
 }
 
 .template-note {
@@ -196,13 +211,17 @@ main {
     min-width: 300px;
 }
 
-.template-note ul {
-    padding-left: 20px;
-    margin-top: 15px;
-}
-
-.template-note li {
-    margin-bottom: 10px;
+.template-example-code {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    height: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 /* Секция конвертации */
@@ -211,11 +230,19 @@ main {
     border-radius: 15px;
     padding: 25px;
     margin-bottom: 40px;
-    text-align: center;
+}
+
+.conversion-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
 }
 
 .law-input {
-    margin-bottom: 25px;
+    flex: 1;
+    min-width: 300px;
 }
 
 .law-input label {
@@ -231,7 +258,8 @@ main {
     font-size: 1.2rem;
     border: 2px solid #ddd;
     border-radius: 8px;
-    width: 200px;
+    width: 100%;
+    max-width: 200px;
     text-align: center;
     transition: border-color 0.3s;
 }
@@ -273,6 +301,7 @@ main {
     white-space: pre-wrap;
     word-wrap: break-word;
     border: 1px solid #34495e;
+    font-family: 'Courier New', monospace;
 }
 
 /* Предпросмотр */
@@ -297,6 +326,7 @@ main {
     background-color: white;
     border-radius: 10px;
     border: 1px solid #eee;
+    margin-bottom: 20px;
 }
 
 .placeholder {
@@ -332,6 +362,7 @@ main {
     background-color: #f8f9fa;
     border-radius: 6px;
     border: 1px solid #e9ecef;
+    font-size: 0.95rem;
 }
 
 .correct-answer {
@@ -345,6 +376,43 @@ main {
     background-color: #f8d7da;
     border-color: #f5c6cb;
     color: #721c24;
+}
+
+/* Статистика */
+.stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    flex: 1;
+    min-width: 200px;
+}
+
+.stat-item i {
+    font-size: 1.5rem;
+    color: #3498db;
+}
+
+.stat-item span {
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.stat-item span span {
+    font-weight: bold;
+    color: #2c3e50;
 }
 
 /* Футер */
@@ -400,12 +468,20 @@ footer p {
         flex-direction: column;
     }
     
-    .result-controls {
+    .result-controls, .input-controls, .conversion-controls {
         flex-direction: column;
     }
     
     .btn {
         width: 100%;
         justify-content: center;
+    }
+    
+    .law-input input {
+        max-width: 100%;
+    }
+    
+    .stat-item {
+        min-width: 100%;
     }
 }

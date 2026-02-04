@@ -1,19 +1,58 @@
 // Константы для DOM элементов
-const fileInput = document.getElementById('fileInput');
-const uploadBox = document.getElementById('uploadBox');
+const textInput = document.getElementById('textInput');
 const convertBtn = document.getElementById('convertBtn');
 const jsonOutput = document.getElementById('jsonOutput');
 const copyBtn = document.getElementById('copyBtn');
 const downloadBtn = document.getElementById('downloadBtn');
-const clearBtn = document.getElementById('clearBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
+const clearInputBtn = document.getElementById('clearInputBtn');
+const loadExampleBtn = document.getElementById('loadExampleBtn');
 const lawNumberInput = document.getElementById('lawNumber');
 const previewContainer = document.getElementById('previewContainer');
 const notification = document.getElementById('notification');
 const notificationText = document.getElementById('notificationText');
+const totalQuestionsEl = document.getElementById('totalQuestions');
+const correctAnswersEl = document.getElementById('correctAnswers');
+const incorrectAnswersEl = document.getElementById('incorrectAnswers');
 
-// Переменная для хранения данных файла
-let fileContent = '';
+// Переменная для хранения распарсенных вопросов
 let parsedQuestions = [];
+
+// Пример текста для тестирования
+const exampleText = `Как называется основной закон государства?
+Конституция
+Указ
+Постановление
+Приказ
+Закон
+
+Сколько ветвей власти в демократическом государстве?
+Три
+Одна
+Две
+Четыре
+Пять
+
+Кто является главой государства в Российской Федерации?
+Президент
+Премьер-министр
+Председатель Госдумы
+Председатель Совета Федерации
+Генеральный прокурор
+
+Что такое правовое государство?
+Государство, где верховенствует закон
+Государство с сильной армией
+Государство с монархической формой правления
+Государство с плановой экономикой
+Государство без конституции
+
+Какой орган принимает законы в РФ?
+Государственная Дума
+Правительство
+Конституционный суд
+Верховный суд
+Прокуратура`;
 
 // Показываем уведомление
 function showNotification(message, duration = 3000) {
@@ -25,121 +64,39 @@ function showNotification(message, duration = 3000) {
     }, duration);
 }
 
-// Обработчики событий для drag & drop
-uploadBox.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadBox.classList.add('dragover');
-});
-
-uploadBox.addEventListener('dragleave', () => {
-    uploadBox.classList.remove('dragover');
-});
-
-uploadBox.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadBox.classList.remove('dragover');
-    
-    if (e.dataTransfer.files.length) {
-        const file = e.dataTransfer.files[0];
-        if (isValidFileType(file)) {
-            readFile(file);
-        } else {
-            showNotification('Пожалуйста, загрузите файл формата .docx, .doc или .txt');
-        }
-    }
-});
-
-// Клик по области загрузки
-uploadBox.addEventListener('click', () => {
-    fileInput.click();
-});
-
-// Обработчик выбора файла
-fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) {
-        const file = e.target.files[0];
-        if (isValidFileType(file)) {
-            readFile(file);
-        } else {
-            showNotification('Пожалуйста, загрузите файл формата .docx, .doc или .txt');
-        }
-    }
-});
-
-// Проверка типа файла
-function isValidFileType(file) {
-    const validTypes = ['application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                       'application/msword', 'text/plain'];
-    return validTypes.includes(file.type) || 
-           file.name.endsWith('.docx') || 
-           file.name.endsWith('.doc') || 
-           file.name.endsWith('.txt');
-}
-
-// Чтение файла
-function readFile(file) {
-    const reader = new FileReader();
-    
-    reader.onload = function(e) {
-        fileContent = e.target.result;
-        convertBtn.disabled = false;
-        
-        // Показываем имя файла
-        uploadBox.querySelector('p').textContent = `Загружен файл: ${file.name}`;
-        showNotification(`Файл "${file.name}" успешно загружен`);
-        
-        // Показываем предпросмотр после загрузки
-        parseFileContent();
-    };
-    
-    reader.onerror = function() {
-        showNotification('Ошибка при чтении файла');
-    };
-    
-    // Для .docx файлов используем TextDecoder для извлечения текста
-    if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-        // Для .docx файлов читаем как ArrayBuffer
-        reader.readAsArrayBuffer(file);
-    } else {
-        // Для .doc и .txt читаем как текст
-        reader.readAsText(file);
-    }
-}
-
-// Парсинг содержимого файла
-function parseFileContent() {
-    // Если это .docx файл (читался как ArrayBuffer), пытаемся извлечь текст
-    if (fileContent instanceof ArrayBuffer) {
-        // Для простоты, в реальном приложении нужна более сложная обработка .docx
-        // В этом примере мы просто показываем сообщение
-        jsonOutput.textContent = 'Для .docx файлов требуется специальная обработка. В данном демо-приложении используйте .txt файлы или вставьте текст напрямую.';
-        showNotification('Для .docx файлов рекомендуется использовать .txt формат в этом демо');
-        return;
-    }
-    
+// Парсинг текста с вопросами
+function parseText(text) {
     // Разделяем содержимое на строки
-    const lines = fileContent.split(/\r?\n/);
+    const lines = text.split(/\r?\n/);
     const questions = [];
     let currentQuestion = null;
+    let lineNumber = 0;
     
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
+        lineNumber++;
         
         // Пропускаем пустые строки
         if (!line) continue;
         
         // Если строка заканчивается на "?" - это вопрос
         if (line.endsWith('?')) {
-            // Если уже есть текущий вопрос, сохраняем его
+            // Если уже есть текущий вопрос, сохраняем его (если он полный)
             if (currentQuestion && currentQuestion.question) {
-                questions.push(currentQuestion);
+                // Проверяем, что у вопроса есть все необходимые ответы
+                if (currentQuestion.correctAnswer && currentQuestion.incorrectAnswers.length === 4) {
+                    questions.push(currentQuestion);
+                } else {
+                    console.warn(`Вопрос "${currentQuestion.question}" пропущен - не хватает ответов`);
+                }
             }
             
             // Создаем новый вопрос
             currentQuestion = {
                 question: line,
                 correctAnswer: '',
-                incorrectAnswers: []
+                incorrectAnswers: [],
+                lineNumber: lineNumber
             };
         } 
         // Если у нас есть текущий вопрос и это не вопрос
@@ -152,26 +109,41 @@ function parseFileContent() {
             else if (currentQuestion.incorrectAnswers.length < 4) {
                 currentQuestion.incorrectAnswers.push(line);
             }
+            // Если больше 4 неправильных ответов - игнорируем
         }
+        // Если строка не является вопросом и нет текущего вопроса, пропускаем
     }
     
-    // Добавляем последний вопрос, если он есть
-    if (currentQuestion && currentQuestion.question) {
+    // Добавляем последний вопрос, если он есть и полный
+    if (currentQuestion && currentQuestion.question && currentQuestion.correctAnswer && currentQuestion.incorrectAnswers.length === 4) {
         questions.push(currentQuestion);
+    } else if (currentQuestion && currentQuestion.question) {
+        console.warn(`Последний вопрос "${currentQuestion.question}" пропущен - не хватает ответов`);
     }
     
     parsedQuestions = questions;
-    updatePreview();
+    return questions;
+}
+
+// Обновление статистики
+function updateStats() {
+    const totalQuestions = parsedQuestions.length;
+    const totalCorrect = parsedQuestions.length; // По одному правильному на вопрос
+    const totalIncorrect = parsedQuestions.length * 4; // По 4 неправильных на вопрос
+    
+    totalQuestionsEl.textContent = totalQuestions;
+    correctAnswersEl.textContent = totalCorrect;
+    incorrectAnswersEl.textContent = totalIncorrect;
 }
 
 // Обновление предпросмотра тестов
 function updatePreview() {
     if (parsedQuestions.length === 0) {
-        previewContainer.innerHTML = '<p class="placeholder">Не удалось извлечь вопросы из файла. Проверьте формат файла.</p>';
+        previewContainer.innerHTML = '<p class="placeholder">Не удалось извлечь вопросы из текста. Проверьте формат текста.</p>';
         return;
     }
     
-    let previewHTML = `<p class="placeholder">Найдено вопросов: ${parsedQuestions.length}</p>`;
+    let previewHTML = '';
     
     // Показываем первые 3 вопроса для предпросмотра
     const previewCount = Math.min(parsedQuestions.length, 3);
@@ -194,19 +166,32 @@ function updatePreview() {
     }
     
     previewContainer.innerHTML = previewHTML;
+    updateStats();
 }
 
 // Конвертация в JSON
-convertBtn.addEventListener('click', () => {
-    if (parsedQuestions.length === 0) {
-        showNotification('Нет вопросов для конвертации');
+function convertToJSON() {
+    const inputText = textInput.value.trim();
+    
+    if (!inputText) {
+        showNotification('Введите текст с тестами');
+        return;
+    }
+    
+    const questions = parseText(inputText);
+    
+    if (questions.length === 0) {
+        jsonOutput.textContent = 'Не удалось найти вопросы в указанном формате. Проверьте, что текст соответствует шаблону.';
+        copyBtn.disabled = true;
+        downloadBtn.disabled = true;
+        showNotification('Не удалось найти вопросы в указанном формате');
         return;
     }
     
     const lawNumber = parseInt(lawNumberInput.value) || 1;
     
     // Создаем массив объектов в требуемом формате
-    const jsonData = parsedQuestions.map((q, index) => ({
+    const jsonData = questions.map((q, index) => ({
         law: lawNumber + index, // Увеличиваем номер для каждого вопроса
         question: q.question,
         correctAnswer: q.correctAnswer,
@@ -221,11 +206,12 @@ convertBtn.addEventListener('click', () => {
     copyBtn.disabled = false;
     downloadBtn.disabled = false;
     
-    showNotification(`Успешно сконвертировано ${parsedQuestions.length} вопросов`);
-});
+    showNotification(`Успешно сконвертировано ${questions.length} вопросов`);
+    updatePreview();
+}
 
 // Копирование JSON в буфер обмена
-copyBtn.addEventListener('click', () => {
+function copyToClipboard() {
     const jsonText = jsonOutput.textContent;
     
     // Используем Clipboard API
@@ -237,10 +223,10 @@ copyBtn.addEventListener('click', () => {
             console.error('Ошибка при копировании: ', err);
             showNotification('Не удалось скопировать JSON');
         });
-});
+}
 
 // Скачивание JSON файла
-downloadBtn.addEventListener('click', () => {
+function downloadJSON() {
     const jsonText = jsonOutput.textContent;
     const lawNumber = lawNumberInput.value || '1';
     const blob = new Blob([jsonText], { type: 'application/json' });
@@ -260,63 +246,84 @@ downloadBtn.addEventListener('click', () => {
     }, 100);
     
     showNotification('JSON файл успешно скачан');
-});
+}
 
-// Очистка результатов
-clearBtn.addEventListener('click', () => {
-    fileContent = '';
+// Очистка всего
+function clearAll() {
+    textInput.value = '';
     parsedQuestions = [];
-    jsonOutput.textContent = 'Загрузите файл и нажмите "Конвертировать в JSON"';
-    previewContainer.innerHTML = '<p class="placeholder">Здесь будет показана структура извлеченных тестов</p>';
+    jsonOutput.textContent = 'Вставьте текст с тестами выше и нажмите "Конвертировать в JSON"';
+    previewContainer.innerHTML = '<p class="placeholder">Здесь будет показана структура извлеченных тестов после конвертации</p>';
     
-    // Сбрасываем кнопки и поле ввода
-    convertBtn.disabled = true;
+    // Сбрасываем кнопки
     copyBtn.disabled = true;
     downloadBtn.disabled = true;
-    fileInput.value = '';
-    uploadBox.querySelector('p').textContent = 'Перетащите файл сюда или нажмите для выбора';
+    
+    // Сбрасываем статистику
+    totalQuestionsEl.textContent = '0';
+    correctAnswersEl.textContent = '0';
+    incorrectAnswersEl.textContent = '0';
     
     showNotification('Все данные очищены');
+}
+
+// Очистка только поля ввода
+function clearInput() {
+    textInput.value = '';
+    textInput.focus();
+    showNotification('Поле ввода очищено');
+}
+
+// Загрузка примера
+function loadExample() {
+    textInput.value = exampleText;
+    showNotification('Загружен пример текста с тестами');
+    textInput.focus();
+}
+
+// Автоматическая проверка и предпросмотр при вводе
+let debounceTimer;
+textInput.addEventListener('input', () => {
+    // Очищаем предыдущий таймер
+    clearTimeout(debounceTimer);
+    
+    // Устанавливаем новый таймер для задержки
+    debounceTimer = setTimeout(() => {
+        const inputText = textInput.value.trim();
+        if (inputText) {
+            parseText(inputText);
+            updatePreview();
+        } else {
+            previewContainer.innerHTML = '<p class="placeholder">Здесь будет показана структура извлеченных тестов после конвертации</p>';
+            totalQuestionsEl.textContent = '0';
+            correctAnswersEl.textContent = '0';
+            incorrectAnswersEl.textContent = '0';
+        }
+    }, 500); // Задержка 500 мс
 });
 
-// Пример текста для тестирования (можно удалить в рабочей версии)
-const exampleText = `Как называется основной закон государства?
-Конституция
-Указ
-Постановление
-Приказ
-Закон
+// Обработчики событий
+convertBtn.addEventListener('click', convertToJSON);
+copyBtn.addEventListener('click', copyToClipboard);
+downloadBtn.addEventListener('click', downloadJSON);
+clearAllBtn.addEventListener('click', clearAll);
+clearInputBtn.addEventListener('click', clearInput);
+loadExampleBtn.addEventListener('click', loadExample);
 
-Сколько ветвей власти в демократическом государстве?
-Три
-Одна
-Две
-Четыре
-Пять
-
-Кто является главой государства в Российской Федерации?
-Президент
-Премьер-министр
-Председатель Госдумы
-Председатель Совета Федерации
-Генеральный прокурор`;
-
-// Добавляем возможность вставить пример для демонстрации
+// Автоматическая загрузка примера при первом открытии
 document.addEventListener('DOMContentLoaded', () => {
-    // Добавляем кнопку для примера (только для демо)
-    const demoBtn = document.createElement('button');
-    demoBtn.className = 'btn secondary-btn';
-    demoBtn.innerHTML = '<i class="fas fa-magic"></i> Загрузить пример';
-    demoBtn.style.marginLeft = '15px';
-    demoBtn.style.marginTop = '10px';
+    // Загружаем пример для демонстрации
+    loadExample();
     
-    demoBtn.addEventListener('click', () => {
-        fileContent = exampleText;
-        convertBtn.disabled = false;
-        uploadBox.querySelector('p').textContent = 'Загружен пример файла с тестами';
-        showNotification('Загружен пример файла с тестами');
-        parseFileContent();
+    // Добавляем обработчик клавиш для поля ввода (Ctrl+Enter для конвертации)
+    textInput.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'Enter') {
+            convertToJSON();
+        }
     });
     
-    document.querySelector('.upload-section').appendChild(demoBtn);
+    // Фокус на поле ввода
+    textInput.focus();
+    
+    showNotification('Добро пожаловать! Загружен пример текста. Введите свой текст или отредактируйте пример.');
 });
